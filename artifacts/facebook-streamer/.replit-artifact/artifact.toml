@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Facebook Live Streamer"
+version = "1.0.0"
+id = "artifacts/facebook-streamer"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 18332
+
+[services.development]
+run = "pnpm --filter @workspace/facebook-streamer run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/facebook-streamer", "run", "build" ]
+publicDir = "artifacts/facebook-streamer/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "18332"
+BASE_PATH = "/"

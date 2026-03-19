@@ -1,0 +1,21 @@
+packages:
+  "framer-motion": "For premium smooth animations and page transitions"
+  "react-hook-form": "For robust form state management"
+  "@hookform/resolvers": "For Zod validation integration with forms"
+  "zod": "For schema validation on the frontend"
+  "date-fns": "For formatting timestamps beautifully"
+  "clsx": "For conditional class name merging"
+  "tailwind-merge": "For resolving Tailwind class conflicts"
+
+images:
+  - path: "artifacts/facebook-streamer/public/images/dashboard-hero-bg.png"
+    description: "Dark, moody abstract background with glowing neon blue and purple geometric network lines, subtle light leaks, high-end professional tech dashboard aesthetic"
+    aspect_ratio: "16:9"
+  - path: "artifacts/facebook-streamer/public/images/empty-state.png"
+    description: "Minimalist 3D illustration of a futuristic floating satellite dish or broadcast antenna on a dark background, smooth lighting, premium tech vibe"
+    aspect_ratio: "1:1"
+
+notes:
+  - Using generated hooks from @workspace/api-client-react
+  - Implementing polling for stream status via TanStack Query refetchInterval
+  - Forcing dark mode via document body class in App.tsx for the professional streaming vibe

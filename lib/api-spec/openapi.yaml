@@ -1,15 +1,16 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Facebook Live Streamer API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: streams
+    description: Stream management operations
 paths:
   /healthz:
     get:
@@ -24,6 +25,169 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /streams:
+    get:
+      operationId: getStreams
+      tags: [streams]
+      summary: Get all streams
+      responses:
+        "200":
+          description: List of streams
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Stream"
+    post:
+      operationId: createStream
+      tags: [streams]
+      summary: Create a new stream
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateStreamRequest"
+      responses:
+        "201":
+          description: Stream created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Stream"
+  /streams/{id}:
+    get:
+      operationId: getStream
+      tags: [streams]
+      summary: Get stream by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Stream found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Stream"
+        "404":
+          description: Stream not found
+    put:
+      operationId: updateStream
+      tags: [streams]
+      summary: Update stream
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateStreamRequest"
+      responses:
+        "200":
+          description: Stream updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Stream"
+    delete:
+      operationId: deleteStream
+      tags: [streams]
+      summary: Delete stream
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Stream deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeleteResponse"
+  /streams/{id}/start:
+    post:
+      operationId: startStream
+      tags: [streams]
+      summary: Start streaming
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Stream started
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StreamStatusResponse"
+  /streams/{id}/stop:
+    post:
+      operationId: stopStream
+      tags: [streams]
+      summary: Stop streaming
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Stream stopped
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StreamStatusResponse"
+  /streams/{id}/status:
+    get:
+      operationId: getStreamStatus
+      tags: [streams]
+      summary: Get stream status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Stream status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StreamStatusResponse"
+  /streams/{id}/switch-key:
+    post:
+      operationId: switchStreamKey
+      tags: [streams]
+      summary: Switch between primary and backup stream keys
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Key switched
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StreamStatusResponse"
 components:
   schemas:
     HealthStatus:
@@ -33,4 +197,117 @@ components:
           type: string
       required:
         - status
-
+    Stream:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        sourceUrl:
+          type: string
+        primaryStreamKey:
+          type: string
+        backupStreamKey:
+          type: string
+        rtmpUrl:
+          type: string
+        status:
+          type: string
+          enum: [idle, streaming, error]
+        activeKey:
+          type: string
+          enum: [primary, backup]
+        switchInterval:
+          type: integer
+          description: Interval in seconds for auto key switching (0 = disabled)
+        copyrightProtection:
+          type: boolean
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      required:
+        - id
+        - name
+        - sourceUrl
+        - primaryStreamKey
+        - rtmpUrl
+        - status
+        - activeKey
+        - switchInterval
+        - copyrightProtection
+        - createdAt
+        - updatedAt
+    CreateStreamRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        sourceUrl:
+          type: string
+        primaryStreamKey:
+          type: string
+        backupStreamKey:
+          type: string
+        rtmpUrl:
+          type: string
+          default: rtmp://live-api-s.facebook.com:80/rtmp/
+        switchInterval:
+          type: integer
+          default: 0
+        copyrightProtection:
+          type: boolean
+          default: true
+      required:
+        - name
+        - sourceUrl
+        - primaryStreamKey
+        - rtmpUrl
+    UpdateStreamRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        sourceUrl:
+          type: string
+        primaryStreamKey:
+          type: string
+        backupStreamKey:
+          type: string
+        rtmpUrl:
+          type: string
+        switchInterval:
+          type: integer
+        copyrightProtection:
+          type: boolean
+    StreamStatusResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        status:
+          type: string
+          enum: [idle, streaming, error]
+        activeKey:
+          type: string
+          enum: [primary, backup]
+        message:
+          type: string
+        pid:
+          type: integer
+      required:
+        - id
+        - status
+        - activeKey
+        - message
+    DeleteResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+      required:
+        - success
+        - message
