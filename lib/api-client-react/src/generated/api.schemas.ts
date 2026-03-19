@@ -9,6 +9,41 @@ export interface HealthStatus {
   status: string;
 }
 
+export interface LoginRequest {
+  code: string;
+}
+
+export type LoginResponseRole =
+  (typeof LoginResponseRole)[keyof typeof LoginResponseRole];
+
+export const LoginResponseRole = {
+  admin: "admin",
+  user: "user",
+} as const;
+
+export interface LoginResponse {
+  token: string;
+  role: LoginResponseRole;
+  message: string;
+}
+
+export interface AccessCode {
+  id: number;
+  code: string;
+  used: boolean;
+  usedAt?: string | null;
+  createdAt: string;
+}
+
+export interface ErrorResponse {
+  error: string;
+}
+
+export interface SuccessResponse {
+  success: boolean;
+  message: string;
+}
+
 export type StreamStatus = (typeof StreamStatus)[keyof typeof StreamStatus];
 
 export const StreamStatus = {
@@ -30,11 +65,10 @@ export interface Stream {
   name: string;
   sourceUrl: string;
   primaryStreamKey: string;
-  backupStreamKey?: string;
-  rtmpUrl: string;
+  backupStreamKey?: string | null;
+  rtmpsUrl: string;
   status: StreamStatus;
   activeKey: StreamActiveKey;
-  /** Interval in seconds for auto key switching (0 = disabled) */
   switchInterval: number;
   copyrightProtection: boolean;
   createdAt: string;
@@ -46,7 +80,7 @@ export interface CreateStreamRequest {
   sourceUrl: string;
   primaryStreamKey: string;
   backupStreamKey?: string;
-  rtmpUrl: string;
+  rtmpsUrl: string;
   switchInterval?: number;
   copyrightProtection?: boolean;
 }
@@ -56,7 +90,7 @@ export interface UpdateStreamRequest {
   sourceUrl?: string;
   primaryStreamKey?: string;
   backupStreamKey?: string;
-  rtmpUrl?: string;
+  rtmpsUrl?: string;
   switchInterval?: number;
   copyrightProtection?: boolean;
 }
@@ -83,7 +117,7 @@ export interface StreamStatusResponse {
   status: StreamStatusResponseStatus;
   activeKey: StreamStatusResponseActiveKey;
   message: string;
-  pid?: number;
+  pid?: number | null;
 }
 
 export interface DeleteResponse {

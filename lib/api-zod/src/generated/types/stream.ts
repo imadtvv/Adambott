@@ -13,11 +13,10 @@ export interface Stream {
   name: string;
   sourceUrl: string;
   primaryStreamKey: string;
-  backupStreamKey?: string;
-  rtmpUrl: string;
+  backupStreamKey?: string | null;
+  rtmpsUrl: string;
   status: StreamStatus;
   activeKey: StreamActiveKey;
-  /** Interval in seconds for auto key switching (0 = disabled) */
   switchInterval: number;
   copyrightProtection: boolean;
   createdAt: string;

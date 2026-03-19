@@ -13,5 +13,5 @@ export interface StreamStatusResponse {
   status: StreamStatusResponseStatus;
   activeKey: StreamStatusResponseActiveKey;
   message: string;
-  pid?: number;
+  pid?: number | null;
 }

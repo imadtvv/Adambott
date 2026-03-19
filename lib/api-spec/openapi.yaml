@@ -9,6 +9,10 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: Authentication operations
+  - name: admin
+    description: Admin operations
   - name: streams
     description: Stream management operations
 paths:
@@ -17,7 +21,6 @@ paths:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -25,6 +28,103 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Login with access code
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "401":
+          description: Invalid code
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /auth/verify:
+    get:
+      operationId: verifySession
+      tags: [auth]
+      summary: Verify current session
+      responses:
+        "200":
+          description: Session valid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "401":
+          description: Invalid session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Logout
+      responses:
+        "200":
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+  /admin/codes:
+    get:
+      operationId: getAccessCodes
+      tags: [admin]
+      summary: List all access codes
+      responses:
+        "200":
+          description: List of access codes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AccessCode"
+    post:
+      operationId: generateAccessCode
+      tags: [admin]
+      summary: Generate a new access code
+      responses:
+        "201":
+          description: Code generated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccessCode"
+  /admin/codes/{id}:
+    delete:
+      operationId: deleteAccessCode
+      tags: [admin]
+      summary: Delete an access code
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Code deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
   /streams:
     get:
       operationId: getStreams
@@ -75,7 +175,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Stream"
         "404":
-          description: Stream not found
+          description: Not found
     put:
       operationId: updateStream
       tags: [streams]
@@ -195,8 +295,53 @@ components:
       properties:
         status:
           type: string
-      required:
-        - status
+      required: [status]
+    LoginRequest:
+      type: object
+      properties:
+        code:
+          type: string
+      required: [code]
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+        role:
+          type: string
+          enum: [admin, user]
+        message:
+          type: string
+      required: [token, role, message]
+    AccessCode:
+      type: object
+      properties:
+        id:
+          type: integer
+        code:
+          type: string
+        used:
+          type: boolean
+        usedAt:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+      required: [id, code, used, createdAt]
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required: [error]
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+      required: [success, message]
     Stream:
       type: object
       properties:
@@ -210,7 +355,8 @@ components:
           type: string
         backupStreamKey:
           type: string
-        rtmpUrl:
+          nullable: true
+        rtmpsUrl:
           type: string
         status:
           type: string
@@ -220,25 +366,13 @@ components:
           enum: [primary, backup]
         switchInterval:
           type: integer
-          description: Interval in seconds for auto key switching (0 = disabled)
         copyrightProtection:
           type: boolean
         createdAt:
           type: string
         updatedAt:
           type: string
-      required:
-        - id
-        - name
-        - sourceUrl
-        - primaryStreamKey
-        - rtmpUrl
-        - status
-        - activeKey
-        - switchInterval
-        - copyrightProtection
-        - createdAt
-        - updatedAt
+      required: [id, name, sourceUrl, primaryStreamKey, rtmpsUrl, status, activeKey, switchInterval, copyrightProtection, createdAt, updatedAt]
     CreateStreamRequest:
       type: object
       properties:
@@ -250,20 +384,16 @@ components:
           type: string
         backupStreamKey:
           type: string
-        rtmpUrl:
+        rtmpsUrl:
           type: string
-          default: rtmp://live-api-s.facebook.com:80/rtmp/
+          default: rtmps://live-api-s.facebook.com:443/rtmp/
         switchInterval:
           type: integer
           default: 0
         copyrightProtection:
           type: boolean
           default: true
-      required:
-        - name
-        - sourceUrl
-        - primaryStreamKey
-        - rtmpUrl
+      required: [name, sourceUrl, primaryStreamKey, rtmpsUrl]
     UpdateStreamRequest:
       type: object
       properties:
@@ -275,7 +405,7 @@ components:
           type: string
         backupStreamKey:
           type: string
-        rtmpUrl:
+        rtmpsUrl:
           type: string
         switchInterval:
           type: integer
@@ -296,11 +426,8 @@ components:
           type: string
         pid:
           type: integer
-      required:
-        - id
-        - status
-        - activeKey
-        - message
+          nullable: true
+      required: [id, status, activeKey, message]
     DeleteResponse:
       type: object
       properties:
@@ -308,6 +435,4 @@ components:
           type: boolean
         message:
           type: string
-      required:
-        - success
-        - message
+      required: [success, message]

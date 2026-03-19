@@ -8,7 +8,7 @@ export const streamsTable = pgTable("streams", {
   sourceUrl: text("source_url").notNull(),
   primaryStreamKey: text("primary_stream_key").notNull(),
   backupStreamKey: text("backup_stream_key"),
-  rtmpUrl: text("rtmp_url").notNull().default("rtmp://live-api-s.facebook.com:80/rtmp/"),
+  rtmpsUrl: text("rtmps_url").notNull().default("rtmps://live-api-s.facebook.com:443/rtmp/"),
   status: text("status").notNull().default("idle"),
   activeKey: text("active_key").notNull().default("primary"),
   switchInterval: integer("switch_interval").notNull().default(0),

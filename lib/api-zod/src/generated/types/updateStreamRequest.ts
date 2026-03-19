@@ -11,7 +11,7 @@ export interface UpdateStreamRequest {
   sourceUrl?: string;
   primaryStreamKey?: string;
   backupStreamKey?: string;
-  rtmpUrl?: string;
+  rtmpsUrl?: string;
   switchInterval?: number;
   copyrightProtection?: boolean;
 }

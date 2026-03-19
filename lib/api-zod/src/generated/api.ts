@@ -8,11 +8,64 @@
 import * as zod from "zod";
 
 /**
- * Returns server health status
  * @summary Health check
  */
 export const HealthCheckResponse = zod.object({
   status: zod.string(),
+});
+
+/**
+ * @summary Login with access code
+ */
+export const LoginBody = zod.object({
+  code: zod.string(),
+});
+
+export const LoginResponse = zod.object({
+  token: zod.string(),
+  role: zod.enum(["admin", "user"]),
+  message: zod.string(),
+});
+
+/**
+ * @summary Verify current session
+ */
+export const VerifySessionResponse = zod.object({
+  token: zod.string(),
+  role: zod.enum(["admin", "user"]),
+  message: zod.string(),
+});
+
+/**
+ * @summary Logout
+ */
+export const LogoutResponse = zod.object({
+  success: zod.boolean(),
+  message: zod.string(),
+});
+
+/**
+ * @summary List all access codes
+ */
+export const GetAccessCodesResponseItem = zod.object({
+  id: zod.number(),
+  code: zod.string(),
+  used: zod.boolean(),
+  usedAt: zod.string().nullish(),
+  createdAt: zod.string(),
+});
+export const GetAccessCodesResponse = zod.array(GetAccessCodesResponseItem);
+
+/**
+ * @summary Delete an access code
+ */
+export const DeleteAccessCodeParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const DeleteAccessCodeResponse = zod.object({
+  success: zod.boolean(),
+  message: zod.string(),
 });
 
 /**
@@ -23,13 +76,11 @@ export const GetStreamsResponseItem = zod.object({
   name: zod.string(),
   sourceUrl: zod.string(),
   primaryStreamKey: zod.string(),
-  backupStreamKey: zod.string().optional(),
-  rtmpUrl: zod.string(),
+  backupStreamKey: zod.string().nullish(),
+  rtmpsUrl: zod.string(),
   status: zod.enum(["idle", "streaming", "error"]),
   activeKey: zod.enum(["primary", "backup"]),
-  switchInterval: zod
-    .number()
-    .describe("Interval in seconds for auto key switching (0 = disabled)"),
+  switchInterval: zod.number(),
   copyrightProtection: zod.boolean(),
   createdAt: zod.string(),
   updatedAt: zod.string(),
@@ -39,7 +90,7 @@ export const GetStreamsResponse = zod.array(GetStreamsResponseItem);
 /**
  * @summary Create a new stream
  */
-export const createStreamBodyRtmpUrlDefault = `rtmp://live-api-s.facebook.com:80/rtmp/`;
+export const createStreamBodyRtmpsUrlDefault = `rtmps://live-api-s.facebook.com:443/rtmp/`;
 export const createStreamBodySwitchIntervalDefault = 0;
 export const createStreamBodyCopyrightProtectionDefault = true;
 
@@ -48,7 +99,7 @@ export const CreateStreamBody = zod.object({
   sourceUrl: zod.string(),
   primaryStreamKey: zod.string(),
   backupStreamKey: zod.string().optional(),
-  rtmpUrl: zod.string().default(createStreamBodyRtmpUrlDefault),
+  rtmpsUrl: zod.string().default(createStreamBodyRtmpsUrlDefault),
   switchInterval: zod.number().default(createStreamBodySwitchIntervalDefault),
   copyrightProtection: zod
     .boolean()
@@ -67,13 +118,11 @@ export const GetStreamResponse = zod.object({
   name: zod.string(),
   sourceUrl: zod.string(),
   primaryStreamKey: zod.string(),
-  backupStreamKey: zod.string().optional(),
-  rtmpUrl: zod.string(),
+  backupStreamKey: zod.string().nullish(),
+  rtmpsUrl: zod.string(),
   status: zod.enum(["idle", "streaming", "error"]),
   activeKey: zod.enum(["primary", "backup"]),
-  switchInterval: zod
-    .number()
-    .describe("Interval in seconds for auto key switching (0 = disabled)"),
+  switchInterval: zod.number(),
   copyrightProtection: zod.boolean(),
   createdAt: zod.string(),
   updatedAt: zod.string(),
@@ -91,7 +140,7 @@ export const UpdateStreamBody = zod.object({
   sourceUrl: zod.string().optional(),
   primaryStreamKey: zod.string().optional(),
   backupStreamKey: zod.string().optional(),
-  rtmpUrl: zod.string().optional(),
+  rtmpsUrl: zod.string().optional(),
   switchInterval: zod.number().optional(),
   copyrightProtection: zod.boolean().optional(),
 });
@@ -101,13 +150,11 @@ export const UpdateStreamResponse = zod.object({
   name: zod.string(),
   sourceUrl: zod.string(),
   primaryStreamKey: zod.string(),
-  backupStreamKey: zod.string().optional(),
-  rtmpUrl: zod.string(),
+  backupStreamKey: zod.string().nullish(),
+  rtmpsUrl: zod.string(),
   status: zod.enum(["idle", "streaming", "error"]),
   activeKey: zod.enum(["primary", "backup"]),
-  switchInterval: zod
-    .number()
-    .describe("Interval in seconds for auto key switching (0 = disabled)"),
+  switchInterval: zod.number(),
   copyrightProtection: zod.boolean(),
   createdAt: zod.string(),
   updatedAt: zod.string(),
@@ -137,7 +184,7 @@ export const StartStreamResponse = zod.object({
   status: zod.enum(["idle", "streaming", "error"]),
   activeKey: zod.enum(["primary", "backup"]),
   message: zod.string(),
-  pid: zod.number().optional(),
+  pid: zod.number().nullish(),
 });
 
 /**
@@ -152,7 +199,7 @@ export const StopStreamResponse = zod.object({
   status: zod.enum(["idle", "streaming", "error"]),
   activeKey: zod.enum(["primary", "backup"]),
   message: zod.string(),
-  pid: zod.number().optional(),
+  pid: zod.number().nullish(),
 });
 
 /**
@@ -167,7 +214,7 @@ export const GetStreamStatusResponse = zod.object({
   status: zod.enum(["idle", "streaming", "error"]),
   activeKey: zod.enum(["primary", "backup"]),
   message: zod.string(),
-  pid: zod.number().optional(),
+  pid: zod.number().nullish(),
 });
 
 /**
@@ -182,5 +229,5 @@ export const SwitchStreamKeyResponse = zod.object({
   status: zod.enum(["idle", "streaming", "error"]),
   activeKey: zod.enum(["primary", "backup"]),
   message: zod.string(),
-  pid: zod.number().optional(),
+  pid: zod.number().nullish(),
 });
