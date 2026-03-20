@@ -285,12 +285,16 @@ export default function AdminDashboard() {
 
       {/* ─── GENERATE CODE MODAL ─── */}
       {showGenerateModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
-          <div className="bg-card border border-border rounded-sm shadow-2xl w-full max-w-md mx-4 p-5 overflow-y-auto max-h-[92dvh]">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-bold text-white uppercase tracking-wide">Generate Access Code</h3>
-              <button onClick={() => setShowGenerateModal(false)} className="p-1.5 rounded-sm text-white/40 hover:text-white hover:bg-white/10 transition-colors">
-                <X className="w-4 h-4" />
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm" onClick={(e) => { if (e.target === e.currentTarget) setShowGenerateModal(false); }}>
+          <div className="bg-card border border-border border-b-0 sm:border-b sm:rounded-sm rounded-t-2xl shadow-2xl w-full sm:max-w-md p-5 overflow-y-auto max-h-[88dvh]">
+            {/* Drag handle - mobile only */}
+            <div className="flex justify-center mb-4 sm:hidden">
+              <div className="w-10 h-1 bg-white/20 rounded-full" />
+            </div>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-base font-bold text-white uppercase tracking-wide">إنشاء كود دخول</h3>
+              <button onClick={() => setShowGenerateModal(false)} className="p-2 rounded-full text-white/40 hover:text-white hover:bg-white/10 transition-colors">
+                <X className="w-5 h-5" />
               </button>
             </div>
 
@@ -376,7 +380,7 @@ export default function AdminDashboard() {
               )}
 
               {/* Actions */}
-              <div className="flex gap-3 pt-1">
+              <div className="flex gap-3 pt-1 pb-[env(safe-area-inset-bottom,0px)]">
                 <button
                   onClick={() => setShowGenerateModal(false)}
                   className="flex-1 py-3 rounded-sm border border-border text-white/60 hover:text-white hover:bg-white/5 font-bold uppercase tracking-widest text-xs transition-colors"
