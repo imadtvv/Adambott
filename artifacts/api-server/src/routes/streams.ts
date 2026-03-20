@@ -12,15 +12,18 @@ const activeProcesses = new Map<number, { process: ChildProcess; switchTimer?: R
 
 function buildFFmpegArgs(sourceUrl: string, rtmpsUrl: string, streamKey: string): string[] {
   const destination = `${rtmpsUrl}${streamKey}`;
+  const isHls = sourceUrl.toLowerCase().includes(".m3u8") || sourceUrl.toLowerCase().includes(".ts");
+  const inputArgs = isHls
+    ? ["-re", "-allowed_extensions", "ALL", "-protocol_whitelist", "file,http,https,tcp,tls,crypto", "-i", sourceUrl]
+    : ["-re", "-i", sourceUrl];
+
   return [
-    "-re",
-    "-i", sourceUrl,
+    ...inputArgs,
     "-c:v", "copy",
     "-c:a", "aac",
     "-ar", "44100",
     "-b:a", "128k",
     "-f", "flv",
-    "-rtmp_live", "live",
     destination,
   ];
 }

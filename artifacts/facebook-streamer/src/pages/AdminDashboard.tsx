@@ -64,7 +64,7 @@ export default function AdminDashboard() {
 
   const handleGenerate = () => {
     generateCode.mutate({
-      generateCodeRequest: {
+      data: {
         maxUses,
         expiresAt: expiryEnabled && expiryDate ? new Date(expiryDate).toISOString() : null,
       }
