@@ -21,6 +21,7 @@ import type {
   CreateStreamRequest,
   DeleteResponse,
   ErrorResponse,
+  GenerateCodeRequest,
   HealthStatus,
   LoginRequest,
   LoginResponse,
@@ -439,11 +440,14 @@ export const getGenerateAccessCodeUrl = () => {
 };
 
 export const generateAccessCode = async (
+  generateCodeRequest?: GenerateCodeRequest,
   options?: RequestInit,
 ): Promise<AccessCode> => {
   return customFetch<AccessCode>(getGenerateAccessCodeUrl(), {
     ...options,
     method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(generateCodeRequest),
   });
 };
 
@@ -454,14 +458,14 @@ export const getGenerateAccessCodeMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof generateAccessCode>>,
     TError,
-    void,
+    { data: BodyType<GenerateCodeRequest> },
     TContext
   >;
   request?: SecondParameter<typeof customFetch>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof generateAccessCode>>,
   TError,
-  void,
+  { data: BodyType<GenerateCodeRequest> },
   TContext
 > => {
   const mutationKey = ["generateAccessCode"];
@@ -475,9 +479,11 @@ export const getGenerateAccessCodeMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof generateAccessCode>>,
-    void
-  > = () => {
-    return generateAccessCode(requestOptions);
+    { data: BodyType<GenerateCodeRequest> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return generateAccessCode(data, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
@@ -486,7 +492,7 @@ export const getGenerateAccessCodeMutationOptions = <
 export type GenerateAccessCodeMutationResult = NonNullable<
   Awaited<ReturnType<typeof generateAccessCode>>
 >;
-
+export type GenerateAccessCodeMutationBody = BodyType<GenerateCodeRequest>;
 export type GenerateAccessCodeMutationError = ErrorType<unknown>;
 
 /**
@@ -499,14 +505,14 @@ export const useGenerateAccessCode = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof generateAccessCode>>,
     TError,
-    void,
+    { data: BodyType<GenerateCodeRequest> },
     TContext
   >;
   request?: SecondParameter<typeof customFetch>;
 }): UseMutationResult<
   Awaited<ReturnType<typeof generateAccessCode>>,
   TError,
-  void,
+  { data: BodyType<GenerateCodeRequest> },
   TContext
 > => {
   return useMutation(getGenerateAccessCodeMutationOptions(options));

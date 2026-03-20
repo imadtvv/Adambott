@@ -100,6 +100,12 @@ paths:
       operationId: generateAccessCode
       tags: [admin]
       summary: Generate a new access code
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateCodeRequest"
       responses:
         "201":
           description: Code generated
@@ -320,14 +326,32 @@ components:
           type: integer
         code:
           type: string
+        maxUses:
+          type: integer
+        useCount:
+          type: integer
         used:
           type: boolean
         usedAt:
           type: string
           nullable: true
+        expiresAt:
+          type: string
+          nullable: true
         createdAt:
           type: string
-      required: [id, code, used, createdAt]
+      required: [id, code, maxUses, useCount, used, createdAt]
+    GenerateCodeRequest:
+      type: object
+      properties:
+        maxUses:
+          type: integer
+          default: 1
+          description: How many times this code can be used
+        expiresAt:
+          type: string
+          nullable: true
+          description: ISO date string when the code expires (null = never)
     ErrorResponse:
       type: object
       properties:

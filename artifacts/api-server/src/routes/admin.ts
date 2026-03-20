@@ -2,7 +2,6 @@ import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
 import { accessCodesTable } from "@workspace/db/schema";
 import { eq } from "drizzle-orm";
-import crypto from "crypto";
 import { requireAdmin } from "./auth.js";
 
 const router: IRouter = Router();
@@ -17,33 +16,38 @@ function generateCode(): string {
   return code;
 }
 
+function serializeCode(c: typeof accessCodesTable.$inferSelect) {
+  return {
+    ...c,
+    usedAt: c.usedAt?.toISOString() ?? null,
+    expiresAt: c.expiresAt?.toISOString() ?? null,
+    createdAt: c.createdAt.toISOString(),
+  };
+}
+
 router.get("/codes", requireAdmin, async (_req, res) => {
   const codes = await db.select().from(accessCodesTable)
     .orderBy(accessCodesTable.createdAt);
-  res.json(codes.map(c => ({
-    ...c,
-    usedAt: c.usedAt?.toISOString() ?? null,
-    createdAt: c.createdAt.toISOString(),
-  })));
+  res.json(codes.map(serializeCode));
 });
 
-router.post("/codes", requireAdmin, async (_req, res) => {
-  let code: string;
-  let attempts = 0;
-  do {
-    code = generateCode();
-    attempts++;
-  } while (attempts < 10);
+router.post("/codes", requireAdmin, async (req, res) => {
+  const { maxUses, expiresAt } = req.body ?? {};
+
+  const parsedMaxUses = maxUses && Number(maxUses) > 0 ? Number(maxUses) : 1;
+  const parsedExpiresAt = expiresAt ? new Date(expiresAt) : null;
+
+  const code = generateCode();
 
   const [newCode] = await db.insert(accessCodesTable)
-    .values({ code })
+    .values({
+      code,
+      maxUses: parsedMaxUses,
+      expiresAt: parsedExpiresAt ?? undefined,
+    })
     .returning();
 
-  res.status(201).json({
-    ...newCode,
-    usedAt: newCode.usedAt?.toISOString() ?? null,
-    createdAt: newCode.createdAt.toISOString(),
-  });
+  res.status(201).json(serializeCode(newCode));
 });
 
 router.delete("/codes/:id", requireAdmin, async (req, res) => {

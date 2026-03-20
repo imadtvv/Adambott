@@ -55,13 +55,30 @@ router.post("/login", async (req, res) => {
     const [accessCode] = await db.select().from(accessCodesTable)
       .where(eq(accessCodesTable.code, code));
 
-    if (!accessCode || accessCode.used) {
-      res.status(401).json({ error: "Invalid or already used access code" });
+    if (!accessCode) {
+      res.status(401).json({ error: "Invalid access code" });
       return;
     }
 
+    if (accessCode.useCount >= accessCode.maxUses) {
+      res.status(401).json({ error: "This code has reached its maximum usage limit" });
+      return;
+    }
+
+    if (accessCode.expiresAt && accessCode.expiresAt < new Date()) {
+      res.status(401).json({ error: "This access code has expired" });
+      return;
+    }
+
+    const newCount = accessCode.useCount + 1;
+    const fullyUsed = newCount >= accessCode.maxUses;
+
     await db.update(accessCodesTable)
-      .set({ used: true, usedAt: new Date() })
+      .set({
+        useCount: newCount,
+        used: fullyUsed,
+        usedAt: fullyUsed ? new Date() : accessCode.usedAt,
+      })
       .where(eq(accessCodesTable.id, accessCode.id));
   }
 

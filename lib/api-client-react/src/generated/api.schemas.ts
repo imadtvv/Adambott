@@ -30,9 +30,19 @@ export interface LoginResponse {
 export interface AccessCode {
   id: number;
   code: string;
+  maxUses: number;
+  useCount: number;
   used: boolean;
   usedAt?: string | null;
+  expiresAt?: string | null;
   createdAt: string;
+}
+
+export interface GenerateCodeRequest {
+  /** How many times this code can be used */
+  maxUses?: number;
+  /** ISO date string when the code expires (null = never) */
+  expiresAt?: string | null;
 }
 
 export interface ErrorResponse {

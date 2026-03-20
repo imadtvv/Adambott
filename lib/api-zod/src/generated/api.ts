@@ -50,11 +50,30 @@ export const LogoutResponse = zod.object({
 export const GetAccessCodesResponseItem = zod.object({
   id: zod.number(),
   code: zod.string(),
+  maxUses: zod.number(),
+  useCount: zod.number(),
   used: zod.boolean(),
   usedAt: zod.string().nullish(),
+  expiresAt: zod.string().nullish(),
   createdAt: zod.string(),
 });
 export const GetAccessCodesResponse = zod.array(GetAccessCodesResponseItem);
+
+/**
+ * @summary Generate a new access code
+ */
+export const generateAccessCodeBodyMaxUsesDefault = 1;
+
+export const GenerateAccessCodeBody = zod.object({
+  maxUses: zod
+    .number()
+    .default(generateAccessCodeBodyMaxUsesDefault)
+    .describe("How many times this code can be used"),
+  expiresAt: zod
+    .string()
+    .nullish()
+    .describe("ISO date string when the code expires (null = never)"),
+});
 
 /**
  * @summary Delete an access code

@@ -10,6 +10,7 @@ export * from "./accessCode";
 export * from "./createStreamRequest";
 export * from "./deleteResponse";
 export * from "./errorResponse";
+export * from "./generateCodeRequest";
 export * from "./healthStatus";
 export * from "./loginRequest";
 export * from "./loginResponse";
