@@ -286,7 +286,7 @@ export default function AdminDashboard() {
       {/* ─── GENERATE CODE MODAL ─── */}
       {showGenerateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
-          <div className="bg-card border border-border rounded-sm shadow-2xl w-full max-w-md mx-4 p-6">
+          <div className="bg-card border border-border rounded-sm shadow-2xl w-full max-w-md mx-4 p-5 overflow-y-auto max-h-[92dvh]">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-bold text-white uppercase tracking-wide">Generate Access Code</h3>
               <button onClick={() => setShowGenerateModal(false)} className="p-1.5 rounded-sm text-white/40 hover:text-white hover:bg-white/10 transition-colors">
@@ -294,37 +294,37 @@ export default function AdminDashboard() {
               </button>
             </div>
 
-            <div className="space-y-5">
+            <div className="space-y-4">
               {/* Max Uses */}
               <div>
-                <label className="block text-xs font-bold text-white/60 uppercase tracking-widest mb-3 flex items-center gap-2">
-                  <Users className="w-3.5 h-3.5" /> Max Number of Users
+                <label className="block text-xs font-bold text-white/60 uppercase tracking-widest mb-2 flex items-center gap-2">
+                  <Users className="w-3.5 h-3.5" /> عدد المستخدمين
                 </label>
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() => setMaxUses(v => Math.max(1, v - 1))}
-                    className="w-10 h-10 rounded-sm bg-black border border-border text-white font-bold text-lg flex items-center justify-center hover:border-primary hover:text-primary transition-colors"
+                    className="w-11 h-11 rounded-sm bg-black border border-border text-white font-bold text-xl flex items-center justify-center hover:border-primary hover:text-primary transition-colors active:scale-95"
                   >−</button>
-                  <div className="flex-1 text-center">
-                    <span className="text-3xl font-bold text-primary font-mono">{maxUses}</span>
-                    <p className="text-[10px] text-white/30 uppercase tracking-widest mt-0.5">
-                      {maxUses === 1 ? "Single use" : `${maxUses} users`}
+                  <div className="flex-1 text-center py-2 bg-black/40 border border-border/60 rounded-sm">
+                    <span className="text-2xl font-bold text-primary font-mono">{maxUses}</span>
+                    <p className="text-[10px] text-white/30 uppercase tracking-widest">
+                      {maxUses === 1 ? "مستخدم واحد" : `${maxUses} مستخدمين`}
                     </p>
                   </div>
                   <button
                     onClick={() => setMaxUses(v => Math.min(100, v + 1))}
-                    className="w-10 h-10 rounded-sm bg-black border border-border text-white font-bold text-lg flex items-center justify-center hover:border-primary hover:text-primary transition-colors"
+                    className="w-11 h-11 rounded-sm bg-black border border-border text-white font-bold text-xl flex items-center justify-center hover:border-primary hover:text-primary transition-colors active:scale-95"
                   >+</button>
                 </div>
                 {/* Quick presets */}
-                <div className="flex gap-2 mt-3">
+                <div className="flex gap-1.5 mt-2">
                   {[1, 5, 10, 25, 50].map(n => (
                     <button
                       key={n}
                       onClick={() => setMaxUses(n)}
                       className={clsx(
-                        "flex-1 py-1.5 rounded-sm text-[10px] font-bold uppercase tracking-wider border transition-colors",
-                        maxUses === n ? "bg-primary/20 border-primary/40 text-primary" : "bg-black border-border text-white/40 hover:text-white hover:border-white/20"
+                        "flex-1 py-2 rounded-sm text-xs font-bold border transition-colors",
+                        maxUses === n ? "bg-primary/20 border-primary/50 text-primary" : "bg-black border-border text-white/40 hover:text-white"
                       )}
                     >{n}</button>
                   ))}
@@ -333,20 +333,20 @@ export default function AdminDashboard() {
 
               {/* Expiry */}
               <div>
-                <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center justify-between mb-2">
                   <label className="text-xs font-bold text-white/60 uppercase tracking-widest flex items-center gap-2">
-                    <Clock className="w-3.5 h-3.5" /> Expiry Time
+                    <Clock className="w-3.5 h-3.5" /> وقت الانتهاء
                   </label>
                   <button
                     onClick={() => setExpiryEnabled(v => !v)}
                     className={clsx(
-                      "relative w-10 h-5 rounded-full transition-colors border",
+                      "relative w-11 h-6 rounded-full transition-colors border shrink-0",
                       expiryEnabled ? "bg-primary border-primary/50" : "bg-white/10 border-border"
                     )}
                   >
                     <span className={clsx(
-                      "absolute top-0.5 w-4 h-4 rounded-full bg-white transition-all",
-                      expiryEnabled ? "left-5" : "left-0.5"
+                      "absolute top-0.5 w-5 h-5 rounded-full bg-white transition-all shadow",
+                      expiryEnabled ? "left-[22px]" : "left-0.5"
                     )} />
                   </button>
                 </div>
@@ -356,42 +356,42 @@ export default function AdminDashboard() {
                     value={expiryDate}
                     onChange={e => setExpiryDate(e.target.value)}
                     min={new Date().toISOString().slice(0, 16)}
-                    className="w-full px-4 py-2.5 bg-black border border-border rounded-sm text-white text-sm font-mono focus:outline-none focus:border-primary transition-colors"
+                    className="w-full px-3 py-2.5 bg-black border border-border rounded-sm text-white text-sm font-mono focus:outline-none focus:border-primary transition-colors"
                   />
                 ) : (
-                  <div className="px-4 py-2.5 bg-black/40 border border-border/50 rounded-sm text-white/30 text-xs uppercase tracking-wider">
-                    Never expires
+                  <div className="px-3 py-2.5 bg-black/40 border border-border/50 rounded-sm text-white/30 text-xs uppercase tracking-wider">
+                    لا ينتهي أبداً
                   </div>
                 )}
               </div>
 
               {/* Warning for multi-use */}
               {maxUses > 1 && (
-                <div className="flex items-start gap-2.5 p-3 bg-yellow-500/5 border border-yellow-500/20 rounded-sm">
+                <div className="flex items-start gap-2 p-2.5 bg-yellow-500/5 border border-yellow-500/20 rounded-sm">
                   <AlertTriangle className="w-4 h-4 text-yellow-500 shrink-0 mt-0.5" />
                   <p className="text-xs text-yellow-500/80">
-                    This code can be used by <strong>{maxUses} different users</strong>. Share it carefully.
+                    الكود يمكن استخدامه من <strong>{maxUses} مستخدمين مختلفين</strong>
                   </p>
                 </div>
               )}
 
               {/* Actions */}
-              <div className="flex gap-3 pt-2">
+              <div className="flex gap-3 pt-1">
                 <button
                   onClick={() => setShowGenerateModal(false)}
-                  className="flex-1 py-2.5 rounded-sm border border-border text-white/60 hover:text-white hover:bg-white/5 font-bold uppercase tracking-widest text-xs transition-colors"
+                  className="flex-1 py-3 rounded-sm border border-border text-white/60 hover:text-white hover:bg-white/5 font-bold uppercase tracking-widest text-xs transition-colors"
                 >
-                  Cancel
+                  إلغاء
                 </button>
                 <button
                   onClick={handleGenerate}
                   disabled={generateCode.isPending || (expiryEnabled && !expiryDate)}
-                  className="flex-1 py-2.5 rounded-sm bg-primary hover:bg-primary/90 text-white font-bold uppercase tracking-widest text-xs transition-all shadow-[0_0_20px_rgba(204,0,0,0.3)] hover:shadow-[0_0_30px_rgba(204,0,0,0.5)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="flex-1 py-3 rounded-sm bg-primary hover:bg-primary/90 text-white font-bold uppercase tracking-widest text-xs transition-all shadow-[0_0_20px_rgba(204,0,0,0.3)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {generateCode.isPending ? (
                     <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                   ) : <Plus className="w-4 h-4" />}
-                  Generate
+                  إنشاء
                 </button>
               </div>
             </div>
