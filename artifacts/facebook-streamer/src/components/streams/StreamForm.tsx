@@ -8,7 +8,10 @@ import { Stream } from "@workspace/api-client-react";
 
 const formSchema = z.object({
   name: z.string().min(1, "Stream name is required"),
-  sourceUrl: z.string().url("Must be a valid URL (e.g. http://.../stream.m3u8)"),
+  sourceUrl: z.string().min(5, "Source URL is required").refine(
+    (val) => /^[a-zA-Z][a-zA-Z0-9+\-.]*:\/\/.+/.test(val),
+    "Must be a valid URL (http, https, udp, rtp, rtmp...)"
+  ),
   primaryStreamKey: z.string().min(5, "Primary stream key is required"),
   backupStreamKey: z.string().optional(),
   rtmpsUrl: z.string().url("Must be a valid RTMPS URL").default("rtmps://live-api-s.facebook.com:443/rtmp/"),
@@ -74,7 +77,7 @@ export function StreamForm({ initialData, onSuccess }: StreamFormProps) {
           <input
             {...form.register("sourceUrl")}
             className="w-full bg-black border border-border rounded-sm px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all font-mono text-sm"
-            placeholder="http://example.com/live/stream.m3u8"
+            placeholder="http://example.com/live/stream.m3u8 or .ts or udp://..."
           />
           {form.formState.errors.sourceUrl && (
             <p className="text-primary text-[10px] uppercase tracking-wider mt-1.5 font-bold">{form.formState.errors.sourceUrl.message}</p>

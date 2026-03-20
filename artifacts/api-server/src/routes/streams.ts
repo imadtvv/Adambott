@@ -12,10 +12,32 @@ const activeProcesses = new Map<number, { process: ChildProcess; switchTimer?: R
 
 function buildFFmpegArgs(sourceUrl: string, rtmpsUrl: string, streamKey: string): string[] {
   const destination = `${rtmpsUrl}${streamKey}`;
-  const isHls = sourceUrl.toLowerCase().includes(".m3u8") || sourceUrl.toLowerCase().includes(".ts");
-  const inputArgs = isHls
-    ? ["-re", "-allowed_extensions", "ALL", "-protocol_whitelist", "file,http,https,tcp,tls,crypto", "-i", sourceUrl]
-    : ["-re", "-i", sourceUrl];
+  const lower = sourceUrl.toLowerCase();
+  const isHls = lower.includes(".m3u8");
+  const isMpegTs = lower.includes(".ts");
+  const isUdp = lower.startsWith("udp://");
+  const isRtp = lower.startsWith("rtp://");
+  const isSrt = lower.startsWith("srt://");
+
+  let inputArgs: string[];
+
+  if (isHls) {
+    inputArgs = [
+      "-re",
+      "-allowed_extensions", "ALL",
+      "-protocol_whitelist", "file,http,https,tcp,tls,crypto",
+      "-i", sourceUrl,
+    ];
+  } else if (isMpegTs || isUdp || isRtp || isSrt) {
+    inputArgs = [
+      "-re",
+      "-fflags", "+genpts",
+      "-protocol_whitelist", "file,http,https,tcp,tls,crypto,udp,rtp,srtp,srt",
+      "-i", sourceUrl,
+    ];
+  } else {
+    inputArgs = ["-re", "-i", sourceUrl];
+  }
 
   return [
     ...inputArgs,
