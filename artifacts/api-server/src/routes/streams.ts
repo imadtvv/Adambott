@@ -19,10 +19,7 @@ function buildFFmpegArgs(sourceUrl: string, rtmpsUrl: string, streamKey: string)
 
   return [
     ...inputArgs,
-    "-c:v", "copy",
-    "-c:a", "aac",
-    "-ar", "44100",
-    "-b:a", "128k",
+    "-c", "copy",
     "-f", "flv",
     destination,
   ];
