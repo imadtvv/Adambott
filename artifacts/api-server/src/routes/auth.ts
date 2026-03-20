@@ -6,7 +6,7 @@ import crypto from "crypto";
 
 const router: IRouter = Router();
 
-const ADMIN_CODE = "4433";
+const ADMIN_CODE = "4455";
 
 function generateToken(): string {
   return crypto.randomBytes(32).toString("hex");
