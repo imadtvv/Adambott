@@ -219,7 +219,7 @@ export default function AdminDashboard() {
                           ) : (
                             <button
                               onClick={() => setDeleteConfirm(code.id)}
-                              className="p-2 rounded-sm border border-transparent text-white/30 hover:text-destructive hover:bg-destructive/10 hover:border-destructive/20 transition-all inline-flex opacity-0 group-hover:opacity-100"
+                              className="p-2 rounded-sm border border-transparent text-white/30 hover:text-destructive hover:bg-destructive/10 hover:border-destructive/20 transition-all inline-flex opacity-100"
                               title="Delete"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
