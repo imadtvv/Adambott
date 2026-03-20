@@ -123,122 +123,127 @@ export default function AdminDashboard() {
 
         {/* ─── ACCESS CODES TAB ─── */}
         {activeTab === "codes" && (
-          <div className="max-w-5xl mx-auto">
-            <div className="flex items-center justify-between mb-8 border-b border-border pb-6">
+          <div className="max-w-2xl mx-auto">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-6 pb-4 border-b border-border">
               <div>
-                <h2 className="text-2xl font-bold text-white uppercase tracking-wide">Access Codes</h2>
-                <p className="text-white/40 mt-1 text-xs font-medium uppercase tracking-widest">Generate & manage user access</p>
+                <h2 className="text-xl font-bold text-white uppercase tracking-wide">أكواد الدخول</h2>
+                <p className="text-white/40 mt-0.5 text-xs font-medium uppercase tracking-widest">
+                  {codes?.length ?? 0} كود
+                </p>
               </div>
               <button
                 onClick={() => setShowGenerateModal(true)}
-                className="px-5 py-2.5 bg-primary hover:bg-primary/90 text-white font-bold rounded-sm shadow-[0_0_20px_rgba(204,0,0,0.3)] hover:shadow-[0_0_30px_rgba(204,0,0,0.5)] transition-all flex items-center gap-2 uppercase tracking-widest text-xs"
+                className="px-4 py-2.5 bg-primary hover:bg-primary/90 text-white font-bold rounded-sm shadow-[0_0_20px_rgba(204,0,0,0.3)] transition-all flex items-center gap-2 uppercase tracking-widest text-xs"
               >
-                <Plus className="w-4 h-4" /> Generate Code
+                <Plus className="w-4 h-4" /> إنشاء كود
               </button>
             </div>
 
-            {/* Table */}
-            <div className="bg-card border border-border rounded-sm overflow-hidden shadow-2xl">
-              <table className="w-full text-left">
-                <thead className="bg-black/80 border-b border-border">
-                  <tr>
-                    <th className="px-5 py-4 text-[10px] font-bold text-white/40 uppercase tracking-widest">Code</th>
-                    <th className="px-5 py-4 text-[10px] font-bold text-white/40 uppercase tracking-widest">Status</th>
-                    <th className="px-5 py-4 text-[10px] font-bold text-white/40 uppercase tracking-widest">
-                      <span className="flex items-center gap-1"><Users className="w-3 h-3" /> Uses</span>
-                    </th>
-                    <th className="px-5 py-4 text-[10px] font-bold text-white/40 uppercase tracking-widest">
-                      <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> Expires</span>
-                    </th>
-                    <th className="px-5 py-4 text-[10px] font-bold text-white/40 uppercase tracking-widest">Created</th>
-                    <th className="px-5 py-4 text-[10px] font-bold text-white/40 uppercase tracking-widest text-right">Delete</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {codes?.map(code => {
-                    const status = getCodeStatus(code);
-                    return (
-                      <tr key={code.id} className="hover:bg-white/[0.02] transition-colors group">
-                        <td className="px-5 py-4">
+            {/* Cards */}
+            {(!codes || codes.length === 0) ? (
+              <div className="py-16 text-center border border-border rounded-sm bg-card">
+                <Key className="w-10 h-10 text-white/10 mx-auto mb-3" />
+                <p className="text-white/30 text-xs font-bold uppercase tracking-widest">لا توجد أكواد بعد</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {codes.map(code => {
+                  const status = getCodeStatus(code);
+                  const isDeleting = deleteConfirm === code.id;
+                  return (
+                    <div key={code.id} className={clsx(
+                      "bg-card border rounded-sm overflow-hidden transition-all",
+                      isDeleting ? "border-destructive/50 shadow-[0_0_20px_rgba(204,0,0,0.15)]" : "border-border"
+                    )}>
+                      {/* Top row: code + delete */}
+                      <div className="flex items-center gap-3 p-4">
+                        {/* Code */}
+                        <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <code className="bg-black px-3 py-1.5 rounded-sm text-primary font-mono text-sm font-bold border border-border tracking-widest">
+                            <span className="text-primary font-mono text-lg font-bold tracking-[0.2em]">
                               {code.code}
-                            </code>
+                            </span>
                             <button
                               onClick={() => handleCopy(code.code, code.id)}
-                              className="p-1.5 rounded-sm hover:bg-white/10 text-white/30 hover:text-white transition-colors opacity-0 group-hover:opacity-100"
-                              title="Copy"
+                              className="p-1.5 rounded text-white/30 hover:text-white hover:bg-white/10 transition-colors shrink-0"
                             >
                               {copiedId === code.id
-                                ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                                : <Copy className="w-3.5 h-3.5" />}
+                                ? <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                                : <Copy className="w-4 h-4" />}
                             </button>
                           </div>
-                        </td>
-                        <td className="px-5 py-4">
-                          <span className={clsx("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-sm text-[10px] font-bold uppercase tracking-widest border", status.color)}>
+                          {/* Status badge */}
+                          <span className={clsx("inline-flex items-center gap-1.5 mt-1.5 px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase tracking-widest border", status.color)}>
                             <span className={clsx("w-1.5 h-1.5 rounded-full", status.dot)}></span>
                             {status.label}
                           </span>
-                        </td>
-                        <td className="px-5 py-4">
-                          <div className="flex items-center gap-2">
-                            <div className="h-1.5 w-20 bg-white/10 rounded-full overflow-hidden">
-                              <div
-                                className="h-full bg-primary rounded-full transition-all"
-                                style={{ width: `${Math.min(100, (code.useCount / code.maxUses) * 100)}%` }}
-                              />
-                            </div>
-                            <span className="text-xs font-mono text-white/60">{code.useCount}/{code.maxUses}</span>
-                          </div>
-                        </td>
-                        <td className="px-5 py-4 text-xs font-mono text-white/50">
-                          {code.expiresAt
-                            ? <span className={clsx(isPast(parseISO(code.expiresAt)) ? "text-orange-400" : "text-white/60")}>
-                                {format(parseISO(code.expiresAt), 'MMM dd, yyyy HH:mm')}
-                              </span>
-                            : <span className="text-white/20">Never</span>
-                          }
-                        </td>
-                        <td className="px-5 py-4 text-xs font-mono text-white/40">
-                          {format(new Date(code.createdAt), 'MMM dd, yyyy')}
-                        </td>
-                        <td className="px-5 py-4 text-right">
-                          {deleteConfirm === code.id ? (
-                            <div className="flex items-center justify-end gap-2">
-                              <span className="text-[10px] text-white/50 uppercase">Sure?</span>
+                        </div>
+
+                        {/* Delete button */}
+                        {isDeleting ? (
+                          <div className="flex flex-col items-center gap-1.5 shrink-0">
+                            <span className="text-[10px] text-white/50 uppercase tracking-wider">تأكيد؟</span>
+                            <div className="flex gap-2">
                               <button
                                 onClick={() => deleteCode.mutate({ id: code.id })}
-                                className="px-2 py-1 rounded-sm bg-destructive text-white text-[10px] font-bold uppercase hover:bg-destructive/80 transition-colors"
-                              >Yes</button>
+                                disabled={deleteCode.isPending}
+                                className="px-3 py-1.5 rounded-sm bg-destructive text-white text-xs font-bold uppercase tracking-wider hover:bg-destructive/80 transition-colors flex items-center gap-1"
+                              >
+                                {deleteCode.isPending ? <span className="w-3 h-3 border border-white/30 border-t-white rounded-full animate-spin" /> : <Trash2 className="w-3 h-3" />}
+                                حذف
+                              </button>
                               <button
                                 onClick={() => setDeleteConfirm(null)}
-                                className="p-1 rounded-sm text-white/40 hover:text-white transition-colors"
-                              ><X className="w-3.5 h-3.5" /></button>
+                                className="px-3 py-1.5 rounded-sm bg-white/10 text-white text-xs font-bold uppercase tracking-wider hover:bg-white/20 transition-colors"
+                              >
+                                إلغاء
+                              </button>
                             </div>
-                          ) : (
-                            <button
-                              onClick={() => setDeleteConfirm(code.id)}
-                              className="p-2 rounded-sm border border-transparent text-white/30 hover:text-destructive hover:bg-destructive/10 hover:border-destructive/20 transition-all inline-flex opacity-100"
-                              title="Delete"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                  {(!codes || codes.length === 0) && (
-                    <tr>
-                      <td colSpan={6} className="px-6 py-16 text-center text-white/30 text-xs font-bold uppercase tracking-widest">
-                        No access codes yet. Generate one above.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => setDeleteConfirm(code.id)}
+                            className="shrink-0 w-12 h-12 rounded-sm bg-destructive/10 border border-destructive/20 text-destructive hover:bg-destructive hover:text-white active:scale-95 transition-all flex items-center justify-center"
+                            title="حذف الكود"
+                          >
+                            <Trash2 className="w-5 h-5" />
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Bottom row: uses + expiry */}
+                      <div className="flex items-center gap-4 px-4 py-2.5 bg-black/30 border-t border-border/50">
+                        {/* Uses progress */}
+                        <div className="flex items-center gap-2 flex-1">
+                          <Users className="w-3.5 h-3.5 text-white/30 shrink-0" />
+                          <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-primary rounded-full transition-all"
+                              style={{ width: `${Math.min(100, (code.useCount / code.maxUses) * 100)}%` }}
+                            />
+                          </div>
+                          <span className="text-xs font-mono text-white/50 shrink-0">{code.useCount}/{code.maxUses}</span>
+                        </div>
+
+                        {/* Expiry */}
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <Clock className="w-3.5 h-3.5 text-white/30" />
+                          <span className={clsx("text-[11px] font-mono", code.expiresAt
+                            ? (isPast(parseISO(code.expiresAt)) ? "text-orange-400" : "text-white/50")
+                            : "text-white/20"
+                          )}>
+                            {code.expiresAt
+                              ? format(parseISO(code.expiresAt), 'dd/MM/yy HH:mm')
+                              : "لا ينتهي"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
 
