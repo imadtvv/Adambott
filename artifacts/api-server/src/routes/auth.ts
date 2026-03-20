@@ -1,8 +1,9 @@
 import { Router, type IRouter, type Request, type Response, type NextFunction } from "express";
 import { db } from "@workspace/db";
-import { sessionsTable, accessCodesTable } from "@workspace/db/schema";
-import { eq, gt } from "drizzle-orm";
+import { sessionsTable } from "@workspace/db/schema";
+import { eq } from "drizzle-orm";
 import crypto from "crypto";
+import { fbGetCodeByString, fbUpdateCode } from "../lib/firebase.js";
 
 const router: IRouter = Router();
 
@@ -52,8 +53,7 @@ router.post("/login", async (req, res) => {
   if (code === ADMIN_CODE) {
     role = "admin";
   } else {
-    const [accessCode] = await db.select().from(accessCodesTable)
-      .where(eq(accessCodesTable.code, code));
+    const accessCode = await fbGetCodeByString(code);
 
     if (!accessCode) {
       res.status(401).json({ error: "Invalid access code" });
@@ -65,7 +65,7 @@ router.post("/login", async (req, res) => {
       return;
     }
 
-    if (accessCode.expiresAt && accessCode.expiresAt < new Date()) {
+    if (accessCode.expiresAt && new Date(accessCode.expiresAt) < new Date()) {
       res.status(401).json({ error: "This access code has expired" });
       return;
     }
@@ -73,13 +73,11 @@ router.post("/login", async (req, res) => {
     const newCount = accessCode.useCount + 1;
     const fullyUsed = newCount >= accessCode.maxUses;
 
-    await db.update(accessCodesTable)
-      .set({
-        useCount: newCount,
-        used: fullyUsed,
-        usedAt: fullyUsed ? new Date() : accessCode.usedAt,
-      })
-      .where(eq(accessCodesTable.id, accessCode.id));
+    await fbUpdateCode(accessCode.id, {
+      useCount: newCount,
+      used: fullyUsed,
+      usedAt: fullyUsed ? new Date().toISOString() : accessCode.usedAt,
+    });
   }
 
   const token = generateToken();

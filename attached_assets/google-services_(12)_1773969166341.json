@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "700574627113",
+    "firebase_url": "https://mghrib-arrabi-default-rtdb.firebaseio.com",
+    "project_id": "mghrib-arrabi",
+    "storage_bucket": "mghrib-arrabi.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:700574627113:android:0cfae093470334b0d97338",
+        "android_client_info": {
+          "package_name": "com.mghribarrabi.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "700574627113-vsig2qmkt3m3qso0egdp0808g270ad1u.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDiPyrJ9CrGLxeqjEZTr_8Hz0Yi2vxZ1E8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "700574627113-vsig2qmkt3m3qso0egdp0808g270ad1u.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
