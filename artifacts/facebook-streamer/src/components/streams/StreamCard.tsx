@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Play, Square, KeyRound, AlertCircle, RefreshCw, Trash2, Edit2, Loader2, Radio } from "lucide-react";
+import { Play, Square, KeyRound, AlertCircle, RefreshCw, Trash2, Edit2, Loader2, Radio, ChevronDown, ChevronUp } from "lucide-react";
 import { Stream } from "@workspace/api-client-react";
 import { useStreamMutations } from "@/hooks/use-stream-mutations";
 import { clsx } from "clsx";
@@ -20,9 +20,11 @@ export function StreamCard({ stream }: StreamCardProps) {
   const { startStream, stopStream, switchKey, deleteStream } = useStreamMutations();
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [showError, setShowError] = useState(false);
 
   const isStreaming = stream.status === "streaming";
   const isError = stream.status === "error";
+  const lastError = (stream as any).lastError as string | null;
 
   const handleStart = () => startStream.mutate({ id: stream.id });
   const handleStop = () => stopStream.mutate({ id: stream.id });
@@ -99,6 +101,28 @@ export function StreamCard({ stream }: StreamCardProps) {
           </Dialog>
         </div>
       </div>
+
+      {/* FFmpeg Error Display */}
+      {isError && lastError && (
+        <div className="mb-4 bg-orange-500/5 border border-orange-500/20 rounded-sm overflow-hidden">
+          <button
+            onClick={() => setShowError(v => !v)}
+            className="w-full flex items-center justify-between px-3 py-2 text-orange-400 hover:bg-orange-500/10 transition-colors"
+          >
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider">
+              <AlertCircle className="w-3.5 h-3.5" /> FFmpeg Error
+            </div>
+            {showError ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+          </button>
+          {showError && (
+            <div className="px-3 pb-3">
+              <pre className="text-[10px] text-orange-300/80 whitespace-pre-wrap break-all leading-relaxed max-h-32 overflow-y-auto font-mono">
+                {lastError}
+              </pre>
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="space-y-3 mb-6 flex-grow">
         <div className="bg-black/50 p-3 border border-border rounded-sm">

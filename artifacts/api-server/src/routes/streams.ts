@@ -28,27 +28,50 @@ function buildFFmpegArgs(sourceUrl: string, rtmpsUrl: string, streamKey: string)
   ];
 }
 
+const ffmpegLastError = new Map<number, string>();
+
 async function startFFmpegProcess(streamId: number, sourceUrl: string, rtmpsUrl: string, streamKey: string): Promise<ChildProcess> {
   const args = buildFFmpegArgs(sourceUrl, rtmpsUrl, streamKey);
-  logger.info({ streamId }, "Starting FFmpeg process");
+  logger.info({ streamId, cmd: `ffmpeg ${args.join(" ")}` }, "Starting FFmpeg process");
 
   const proc = spawn("ffmpeg", args, {
     stdio: ["ignore", "pipe", "pipe"],
     detached: false,
   });
 
+  let stderrBuf = "";
   proc.stderr?.on("data", (data: Buffer) => {
-    logger.debug({ streamId, stderr: data.toString() }, "FFmpeg stderr");
+    const chunk = data.toString();
+    stderrBuf += chunk;
+    // Keep last 3000 chars for error reporting
+    if (stderrBuf.length > 3000) stderrBuf = stderrBuf.slice(-3000);
+    // Log progress lines at debug, errors at warn
+    const lines = chunk.split("\n");
+    for (const line of lines) {
+      if (line.match(/error|Error|failed|Failed|invalid|Invalid/i)) {
+        logger.warn({ streamId, line }, "FFmpeg error line");
+      }
+    }
   });
 
   proc.on("exit", async (code, signal) => {
-    logger.info({ streamId, code, signal }, "FFmpeg process exited");
+    if (code !== 0 && code !== null) {
+      // Extract meaningful error from stderr
+      const errorLines = stderrBuf.split("\n").filter(l => l.match(/error|Error|failed|Failed|Connection refused|No such|Invalid/i));
+      const errorSummary = errorLines.slice(-5).join(" | ").trim();
+      logger.error({ streamId, code, signal, error: errorSummary || stderrBuf.slice(-500) }, "FFmpeg exited with error");
+      ffmpegLastError.set(streamId, errorSummary || stderrBuf.slice(-300));
+    } else {
+      logger.info({ streamId, code, signal }, "FFmpeg process exited");
+      ffmpegLastError.delete(streamId);
+    }
     const entry = activeProcesses.get(streamId);
     if (entry?.switchTimer) clearInterval(entry.switchTimer);
     activeProcesses.delete(streamId);
+    const finalStatus = (code !== 0 && code !== null && signal === null) ? "error" : "idle";
     try {
       await db.update(streamsTable)
-        .set({ status: "idle", pid: null, updatedAt: new Date() })
+        .set({ status: finalStatus, pid: null, updatedAt: new Date() })
         .where(eq(streamsTable.id, streamId));
     } catch (err) {
       logger.error({ streamId, err }, "Failed to update stream status on exit");
@@ -64,6 +87,7 @@ router.get("/", requireAuth, async (_req, res) => {
     ...s,
     createdAt: s.createdAt.toISOString(),
     updatedAt: s.updatedAt.toISOString(),
+    lastError: ffmpegLastError.get(s.id) ?? null,
   })));
 });
 
@@ -186,7 +210,8 @@ router.get("/:id/status", requireAuth, async (req, res) => {
     res.json({ id, status: "idle", activeKey: stream.activeKey, message: "Stream not running" });
     return;
   }
-  res.json({ id, status: stream.status, activeKey: stream.activeKey, message: isRunning ? "Running" : "Idle", pid: stream.pid });
+  const lastError = ffmpegLastError.get(id) ?? null;
+  res.json({ id, status: stream.status, activeKey: stream.activeKey, message: isRunning ? "Running" : (lastError ? "Error" : "Idle"), pid: stream.pid, lastError });
 });
 
 router.post("/:id/switch-key", requireAuth, async (req, res) => {
